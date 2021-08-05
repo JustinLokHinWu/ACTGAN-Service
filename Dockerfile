@@ -10,5 +10,12 @@ COPY * /app/
 
 RUN pip install -r requirements.txt
 
-CMD python app.py
+CMD if $DEBUG ; then \
+        python app.py ; \
+    else \
+        ["python3", "-m" , "flask", "run", "--host=0.0.0.0"] ; \
+    fi
+
+# CMD python app.py
 # CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+# CMD python -m flask run
