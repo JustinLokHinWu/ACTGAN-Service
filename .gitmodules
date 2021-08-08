@@ -1,0 +1,3 @@
+[submodule "ACTGAN-Service"]
+	path = ACTGAN-Service
+	url = https://github.com/JustinLokHinWu/ACTGAN-Service.git
