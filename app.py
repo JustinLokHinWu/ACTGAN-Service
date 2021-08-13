@@ -1,10 +1,12 @@
 from flask import Flask, request, send_file
+from flask_cors import CORS
 from attrdict import AttrDict
 import json
 import io
 
 from ACTGAN import run_model
 app = Flask(__name__)
+CORS(app)
 
 def setup_model():
     generator_runner = None
