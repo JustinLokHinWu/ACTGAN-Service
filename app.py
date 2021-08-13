@@ -80,15 +80,8 @@ def generate():
 
 @app.route('/get-epochs', methods=['GET'])
 def get_epochs():
-    if request.is_json:
-        req = request.get_json()
-
-        # Get dataset
-        if 'dataset' in req:
-            dataset = req['dataset']
-        else:
-            return 'Missing dataset', 400
-
+    dataset = request.args.get('dataset')
+    if dataset is not None:
         # Setup correct generator
         if dataset == 'cifar':
             generator_runner = setup_model(config_mapping['cifar'])
@@ -99,10 +92,11 @@ def get_epochs():
 
         # Get valid epochs for this dataset
         valid_epochs = generator_runner.get_valid_epochs()
+        valid_epochs.reverse()
         return jsonify({'epochs': valid_epochs})
 
     else:
-        return 'Request is not json', 400
+        return 'Missing dataset parameter', 400
 
 
 if __name__=='__main__':
