@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from attrdict import AttrDict
 import json
@@ -7,6 +7,10 @@ import io
 from ACTGAN import run_model
 app = Flask(__name__)
 CORS(app)
+
+config_mapping = {
+    'cifar': './configs/cifar.json'
+}
 
 def setup_model(cfg_path):
     generator_runner = None
@@ -21,10 +25,10 @@ def setup_model(cfg_path):
     return generator_runner
 
 @app.route('/generate', methods=['POST'])
-def generate_cifar():
-    req = request.get_json()
-
+def generate():
     if request.is_json:
+        req = request.get_json()
+
         # Get class id, error on missing 
         if 'class_id' in req:
             class_id = req['class_id']
@@ -39,14 +43,13 @@ def generate_cifar():
 
         # Setup correct generator
         if dataset == 'cifar':
-            generator_runner = setup_model('./configs/cifar.json')
+            generator_runner = setup_model(config_mapping['cifar'])
         elif dataset == 'mnist':
             return 'Datset not yet implemented', 400
         else:
             return 'Invalid dataset', 400
 
         # Get epochs from request, else use most recent epoch
-        generator_runner.get_valid_epochs()[-1]
         valid_epochs = generator_runner.get_valid_epochs()
         if 'epoch' in req:
             epoch = req['epoch']
@@ -60,6 +63,8 @@ def generate_cifar():
             seed = req['seed']
         else:
             seed = None
+    else:
+        return 'Request is not json', 400
 
     # Generate image using request parameters
     result = generator_runner.evaluate(class_id, epoch, seed)
@@ -72,6 +77,33 @@ def generate_cifar():
     result_io.seek(0)
 
     return send_file(result_io, mimetype='image/jpeg')
+
+@app.route('/get-epochs', methods=['GET'])
+def get_epochs():
+    if request.is_json:
+        req = request.get_json()
+
+        # Get dataset
+        if 'dataset' in req:
+            dataset = req['dataset']
+        else:
+            return 'Missing dataset', 400
+
+        # Setup correct generator
+        if dataset == 'cifar':
+            generator_runner = setup_model(config_mapping['cifar'])
+        elif dataset == 'mnist':
+            return 'Datset not yet implemented', 400
+        else:
+            return 'Invalid dataset', 400
+
+        # Get valid epochs for this dataset
+        valid_epochs = generator_runner.get_valid_epochs()
+        return jsonify({'epochs': valid_epochs})
+
+    else:
+        return 'Request is not json', 400
+
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')
