@@ -8,7 +8,7 @@ from ACTGAN import run_model
 app = Flask(__name__)
 CORS(app)
 
-def setup_model():
+def setup_model(cfg_path):
     generator_runner = None
     try:
         app.logger.info('Initiating generator runner')
@@ -20,10 +20,9 @@ def setup_model():
         app.log_exception(Exception)
     return generator_runner
 
-@app.route('/generate/cifar', methods=['POST'])
+@app.route('/generate', methods=['POST'])
 def generate_cifar():
     req = request.get_json()
-    generator_runner = setup_model()
 
     if request.is_json:
         # Get class id, error on missing 
@@ -31,6 +30,20 @@ def generate_cifar():
             class_id = req['class_id']
         else:
             return 'Missing class id', 400
+
+        # Get dataset
+        if 'dataset' in req:
+            dataset = req['dataset']
+        else:
+            return 'Missing dataset', 400
+
+        # Setup correct generator
+        if dataset == 'cifar':
+            generator_runner = setup_model('./configs/cifar.json')
+        elif dataset == 'mnist':
+            return 'Datset not yet implemented', 400
+        else:
+            return 'Invalid dataset', 400
 
         # Get epochs from request, else use most recent epoch
         generator_runner.get_valid_epochs()[-1]
