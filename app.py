@@ -12,6 +12,21 @@ config_mapping = {
     'cifar': './configs/cifar.json'
 }
 
+# Hardcoded class-index to label dict. TODO refactor to a more scalable solution
+class_mapping = {
+    'cifar': [
+        'airplane',
+        'automobile',
+        'bird',
+        'cat',
+        'deer',
+        'dog',
+        'frog',
+        'horse',
+        'ship',
+        'truck']
+}
+
 def setup_model(cfg_path):
     generator_runner = None
     try:
@@ -95,6 +110,20 @@ def get_epochs():
         valid_epochs.reverse()
         return jsonify({'epochs': valid_epochs})
 
+    else:
+        return 'Missing dataset parameter', 400
+
+@app.route('/get-classes', methods=['GET'])
+def get_classes():
+    dataset = request.args.get('dataset')
+    if dataset is not None:
+        # Setup correct generator
+        if dataset == 'cifar':
+            return jsonify({'classes': class_mapping['cifar']})
+        elif dataset == 'mnist':
+            return 'Datset not yet implemented', 400
+        else:
+            return 'Invalid dataset', 400
     else:
         return 'Missing dataset parameter', 400
 
