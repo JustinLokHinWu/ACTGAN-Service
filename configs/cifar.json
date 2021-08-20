@@ -1,7 +1,20 @@
 {
-    "n_classes": 10, 
-    "cuda": false,
-    "num_channels": 3,
-    "models_dir": "./models/Jul22_02-37-15_DESKTOP-N21VQDG",
-    "noise_size": 100
+    "model_params": {
+        "n_classes": 10, 
+        "cuda": false,
+        "num_channels": 3,
+        "models_dir": "./models/Jul22_02-37-15_DESKTOP-N21VQDG",
+        "noise_size": 100
+    },
+    "classes": [
+        "airplane",
+        "automobile",
+        "bird",
+        "cat",
+        "deer",
+        "dog",
+        "frog",
+        "horse",
+        "ship",
+        "truck"]
 }

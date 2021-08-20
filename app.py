@@ -3,41 +3,60 @@ from flask_cors import CORS
 from attrdict import AttrDict
 import json
 import io
+import os
 
 from ACTGAN import run_model
 app = Flask(__name__)
 CORS(app)
 
-config_mapping = {
-    'cifar': './configs/cifar.json'
-}
+# config_mapping = {
+#     'cifar': './configs/cifar.json'
+# }
 
 # Hardcoded class-index to label dict. TODO refactor to a more scalable solution
-class_mapping = {
-    'cifar': [
-        'airplane',
-        'automobile',
-        'bird',
-        'cat',
-        'deer',
-        'dog',
-        'frog',
-        'horse',
-        'ship',
-        'truck']
-}
+# class_mapping = {
+#     'cifar': [
+#         'airplane',
+#         'automobile',
+#         'bird',
+#         'cat',
+#         'deer',
+#         'dog',
+#         'frog',
+#         'horse',
+#         'ship',
+#         'truck']
+# }
+config = {}
 
-def setup_model(cfg_path):
+@app.before_first_request
+def load_configs():
+    for filename in os.listdir('configs'):
+        if filename.endswith('json'):
+            with open('configs/' + filename) as f:
+                key = filename.split('.')[0]
+                config[key] = json.load(f)
+    
+    # app.logger.info(config)
+
+def setup_model(dataset):
     generator_runner = None
     try:
-        app.logger.info('Initiating generator runner')
-        with open('./ACTGAN/run_config.json') as f:
-            cfg = AttrDict(json.load(f))
-            generator_runner = run_model.GeneratorRunner(cfg)
-            app.logger.info('Initiated generator runner')
+        cfg = AttrDict(config[dataset]['model_params'])
+        generator_runner = run_model.GeneratorRunner(cfg)
     except Exception:
         app.log_exception(Exception)
     return generator_runner
+
+    # try:
+    #     app.logger.info('Initiating generator runner')
+    #     with open('./ACTGAN/run_config.json') as f:
+    #         cfg = AttrDict(json.load(f))
+    #         generator_runner = run_model.GeneratorRunner(cfg)
+    #         app.logger.info('Initiated generator runner')
+    # except Exception:
+    #     app.log_exception(Exception)
+    # return generator_runner
 
 @app.route('/generate', methods=['POST'])
 def generate():
@@ -54,13 +73,11 @@ def generate():
         if 'dataset' in req:
             dataset = req['dataset']
         else:
-            return 'Missing dataset', 400
+            return 'Invalid dataset', 400
 
         # Setup correct generator
-        if dataset == 'cifar':
-            generator_runner = setup_model(config_mapping['cifar'])
-        elif dataset == 'mnist':
-            return 'Datset not yet implemented', 400
+        if dataset in config:
+            generator_runner = setup_model(dataset)
         else:
             return 'Invalid dataset', 400
 
@@ -98,10 +115,8 @@ def get_epochs():
     dataset = request.args.get('dataset')
     if dataset is not None:
         # Setup correct generator
-        if dataset == 'cifar':
-            generator_runner = setup_model(config_mapping['cifar'])
-        elif dataset == 'mnist':
-            return 'Datset not yet implemented', 400
+        if dataset in config:
+            generator_runner = setup_model(dataset)
         else:
             return 'Invalid dataset', 400
 
@@ -118,14 +133,16 @@ def get_classes():
     dataset = request.args.get('dataset')
     if dataset is not None:
         # Setup correct generator
-        if dataset == 'cifar':
-            return jsonify({'classes': class_mapping['cifar']})
-        elif dataset == 'mnist':
-            return 'Datset not yet implemented', 400
+        if dataset in config:
+            return jsonify({'classes': config[dataset]['classes']})
         else:
             return 'Invalid dataset', 400
     else:
         return 'Missing dataset parameter', 400
+
+# @app.route('/get-datasets', methods=['GET'])
+# def get_datasets():
+    
 
 
 if __name__=='__main__':
