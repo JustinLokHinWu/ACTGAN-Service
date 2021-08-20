@@ -9,24 +9,6 @@ from ACTGAN import run_model
 app = Flask(__name__)
 CORS(app)
 
-# config_mapping = {
-#     'cifar': './configs/cifar.json'
-# }
-
-# Hardcoded class-index to label dict. TODO refactor to a more scalable solution
-# class_mapping = {
-#     'cifar': [
-#         'airplane',
-#         'automobile',
-#         'bird',
-#         'cat',
-#         'deer',
-#         'dog',
-#         'frog',
-#         'horse',
-#         'ship',
-#         'truck']
-# }
 config = {}
 
 @app.before_first_request
