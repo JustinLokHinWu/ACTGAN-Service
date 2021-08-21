@@ -1,0 +1,21 @@
+{
+    "model_params": {
+        "n_classes": 10, 
+        "cuda": false,
+        "num_channels": 1,
+        "models_dir": "./models/mnist",
+        "noise_size": 100
+    },
+    "classes": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+    ]
+}
