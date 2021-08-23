@@ -105,7 +105,7 @@ def get_epochs():
         # Get valid epochs for this dataset
         valid_epochs = generator_runner.get_valid_epochs()
         valid_epochs.reverse()
-        return jsonify({'epochs': valid_epochs})
+        return jsonify(valid_epochs)
 
     else:
         return 'Missing dataset parameter', 400
@@ -116,16 +116,15 @@ def get_classes():
     if dataset is not None:
         # Setup correct generator
         if dataset in config:
-            return jsonify({'classes': config[dataset]['classes']})
+            return jsonify(config[dataset]['classes'])
         else:
             return 'Invalid dataset', 400
     else:
         return 'Missing dataset parameter', 400
 
-# @app.route('/get-datasets', methods=['GET'])
-# def get_datasets():
-    
-
+@app.route('/get-datasets', methods=['GET'])
+def get_datasets():
+    return jsonify(list(config.keys()))
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')
