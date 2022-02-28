@@ -126,5 +126,9 @@ def get_classes():
 def get_datasets():
     return jsonify(list(config.keys()))
 
+def create_app():
+    print("Starting production server")
+    return app
+
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')
