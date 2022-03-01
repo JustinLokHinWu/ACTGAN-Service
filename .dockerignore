@@ -1,0 +1,6 @@
+.aws
+.github
+.gitmodules
+.gitignore
+__pycache__
+models
