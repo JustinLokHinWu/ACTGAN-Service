@@ -126,6 +126,10 @@ def get_classes():
 def get_datasets():
     return jsonify(list(config.keys()))
 
+@app.route('/healthcheck', methods=['GET'])
+def check_health():
+    return 'Health OK', 200
+
 def create_app():
     print("Starting production server")
     return app
